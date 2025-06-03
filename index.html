@@ -53,12 +53,17 @@
         <section id="hero" class="flex flex-col items-center justify-center text-center bg-[#F8F5F0] pt-16">
             <div class="main-container">
                 <h1 class="text-4xl md:text-5xl font-bold mb-6">Visual Schedules in K-8 Classrooms</h1>
-                <p class="text-lg md:text-xl text-gray-700 mb-8 max-w-3xl mx-auto">
+                <p class="text-lg md:text-xl text-gray-700 mb-6 max-w-3xl mx-auto">
                     An interactive guide to understanding, designing, and implementing effective visual schedules to support student learning and independence.
                 </p>
-                <a href="#introduction" class="px-8 py-3 highlight-bg text-white font-semibold rounded-lg shadow-md hover:bg-opacity-90 transition-colors">
-                    Explore the Guide
-                </a>
+                <div class="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                    <a href="#introduction" class="px-8 py-3 highlight-bg text-white font-semibold rounded-lg shadow-md hover:bg-opacity-90 transition-colors">
+                        Explore the Guide
+                    </a>
+                    <a href="visual_schedule_creator.html" target="_blank" rel="noopener noreferrer" class="px-8 py-3 accent-bg text-white font-semibold rounded-lg shadow-md hover:bg-opacity-90 transition-colors">
+                        Create a Schedule Now
+                    </a>
+                </div>
             </div>
         </section>
 
@@ -303,9 +308,15 @@
                 }
             });
              // If scrolled to top, hero link active
-            if(window.pageYOffset < sections[0].offsetTop) {
+            if(window.pageYOffset < sections[0].offsetTop) { // Check if user is at the very top
                  navLinks.forEach(link => link.classList.remove('active'));
-                 document.querySelector('a[href^="#hero"]').classList.add('active');
+                 const heroLink = document.querySelector('a[href^="#hero"]'); // The main site title link
+                 if (heroLink) heroLink.classList.add('active'); // Add active to site title if it's a nav link
+            } else if (!current && sections.length > 0 && window.pageYOffset < sections[0].offsetTop) {
+                 // Special handling if above the first "real" section but below hero scroll trigger
+                navLinks.forEach(link => link.classList.remove('active'));
+                 const heroLink = document.querySelector('a[href^="#hero"]');
+                 if (heroLink) heroLink.classList.add('active');
             }
         });
 
