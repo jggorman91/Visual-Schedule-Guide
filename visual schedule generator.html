@@ -398,6 +398,7 @@
         <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6" role="alert">
             <p class="font-bold">Important Note for Educators:</p>
             <p>This tool helps you create schedules to support student understanding, reduce anxiety, and promote independence, based on established research. Custom images you upload are <strong>temporary</strong> and only visible during your current browser session. For permanent saving, look for a future server-side version!</p>
+            <p class="mt-2">For a deeper understanding of how to effectively use visual schedules, <a href="visual_schedule_interactive_guide.html" target="_blank" rel="noopener noreferrer" class="font-semibold underline hover:text-yellow-800 transition-colors">explore our Comprehensive Interactive Guide</a>.</p>
         </div>
 
         <h2>Create a Visual Schedule</h2>
@@ -493,9 +494,9 @@
             { value: '🧑‍🤝‍🧑', text: 'Socialize' }, { value: '🧘', text: 'Meditate' },
             { value: '🏫', text: 'School' }, { value: '🏠', text: 'Home' },
             { value: '🧩', text: 'Puzzle/Manipulatives' }, { value: '🖥️', text: 'Computer Time' },
-            { value: '🗣️', text: 'Speech Therapy' }, { value: '🫂', text: 'OT/Support' }, // Changed OT to an emoji
+            { value: '🗣️', text: 'Speech Therapy' }, { value: '🫂', text: 'OT/Support' }, 
             { value: '🧠', text: 'Counseling/Quiet Time' }, { value: '🚽', text: 'Restroom Break' },
-            { value: '↔️', text: 'Transition Time' } // Changed Transition to an emoji
+            { value: '↔️', text: 'Transition Time' } 
         ];
 
         const focusTips = {
@@ -523,13 +524,11 @@
                 tipBoxDiv.style.display = 'block';
                 if (focusBlockSuggestions[selectedFocus]) {
                     numBlocksSelect.value = focusBlockSuggestions[selectedFocus];
-                    // renderBlockInputs(); // Avoid re-rendering just for tip change if not desired, 
-                                        // but good if numBlocks changes
                 }
             } else {
                 tipBoxDiv.style.display = 'none';
             }
-             renderBlockInputs(); // Call renderBlockInputs after studentFocus changes to reflect numBlocks suggestion
+             renderBlockInputs(); 
         });
         
         function showMessage(message, type = 'info') {
@@ -569,18 +568,19 @@
                     previewImg.src = imageUrl;
                     previewImg.style.display = 'block';
                     clearBtn.style.display = 'inline-block';
-                    if (visualSelect) visualSelect.value = ''; // Clear emoji selection
+                    if (visualSelect) {
+                        visualSelect.value = ''; 
+                        visualSelect.disabled = true;
+                    }
                     showMessage("Image selected successfully!", "info");
                 } else {
                     event.target.value = ''; 
                     previewImg.style.display = 'none';
                     clearBtn.style.display = 'none';
                     uploadedImageUrls[blockIndex] = null;
+                    if (visualSelect) visualSelect.disabled = false;
                     showMessage("Please select an image file (e.g., .jpg, .png, .gif).", "error");
                 }
-            } else { // No file selected or selection cancelled
-                // Don't clear if a preview already exists unless explicitly cleared
-                // This branch is usually if the user cancels the file dialog
             }
         }
 
@@ -588,6 +588,7 @@
             const fileInput = document.getElementById(`customImage${blockIndex}`);
             const previewImg = document.getElementById(`imagePreview${blockIndex}`);
             const clearBtn = document.getElementById(`clearImageBtn${blockIndex}`);
+            const visualSelect = document.getElementById(`visual${blockIndex}`);
             
             if (fileInput) fileInput.value = ''; 
             if (previewImg) {
@@ -600,8 +601,7 @@
                 URL.revokeObjectURL(uploadedImageUrls[blockIndex]);
                 uploadedImageUrls[blockIndex] = null;
             }
-            // Only show message if an image was actually there to be cleared
-            // showMessage("Custom image cleared.", "info"); // Potentially too noisy if called often
+            if (visualSelect) visualSelect.disabled = false; 
         }
 
         function renderBlockInputs() {
@@ -609,7 +609,6 @@
             const newNumBlocks = parseInt(numBlocksSelect.value, 10);
             const includeVisuals = includeVisualsCheckbox.checked;
 
-            // If number of blocks decreases, remove excess blocks and revoke their URLs
             if (newNumBlocks < oldNumBlocks) {
                 for (let i = newNumBlocks; i < oldNumBlocks; i++) {
                     if (uploadedImageUrls[i]) {
@@ -630,7 +629,7 @@
                     visualInputsHtml = `
                         <div class="visual-upload-section">
                             <label for="visual${i}">Choose Visual (Emoji):</label>
-                            <select id="visual${i}" class="mt-1">
+                            <select id="visual${i}" class="mt-1" ${uploadedImageUrls[i] ? 'disabled' : ''}>
                                 ${optionsHtml}
                             </select>
                             <label class="custom-file-upload mt-2" for="customImage${i}">
@@ -670,23 +669,17 @@
                     fileInput.addEventListener('change', (event) => handleImageUpload(event, i));
                     clearBtn.addEventListener('click', () => {
                         clearImage(i);
-                        if(visualSelect) visualSelect.disabled = false; // Re-enable emoji select if image cleared
-                         showMessage("Custom image cleared.", "info");
+                        showMessage("Custom image cleared.", "info");
                     });
                     
                     if (visualSelect) {
-                        // Pre-select emoji if no custom image for this block
-                        if (!uploadedImageUrls[i]) {
-                            // This logic might need to store previous emoji selections if we want to preserve them
-                            // For now, it defaults to the first option or 'No Visual'
-                        } else {
-                            visualSelect.value = ''; // Ensure no emoji is selected if an image is loaded
-                            visualSelect.disabled = true; // Disable emoji select if an image is present
-                        }
-
+                        if (uploadedImageUrls[i]) {
+                            visualSelect.value = ''; 
+                        } // No else needed, default selection works
                         visualSelect.addEventListener('change', () => {
                             if (visualSelect.value !== '') { 
                                 clearImage(i); 
+                                // No need to show "image cleared" if user just selected an emoji over nothing
                             }
                         });
                     }
