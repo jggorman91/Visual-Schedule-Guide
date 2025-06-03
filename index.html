@@ -1,832 +1,472 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visual Schedule Creator</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interactive Guide to Visual Schedules in K-8 Classrooms</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto+Slab:wght@400;700&display=swap" rel="stylesheet" />
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f0f4f8; /* Light blue-gray background */
-            display: flex;
-            justify-content: center;
-            align-items: flex-start; /* Align to the top */
-            min-height: 100vh;
-            padding: 2rem;
-            box-sizing: border-box;
-        }
-        .schedule-creator-container {
-            background-color: #ffffff;
-            padding: 2.5rem;
-            border-radius: 1.5rem; /* More rounded corners */
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); /* Softer shadow */
-            width: 100%;
-            max-width: 800px; /* Max width for better readability */
-            box-sizing: border-box;
-        }
-        h2 {
-            color: #1a202c; /* Darker text for heading */
-            margin-bottom: 2rem;
-            text-align: center;
-            font-size: 2.25rem; /* Larger heading */
-            font-weight: 700;
-        }
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            color: #4a5568; /* Medium gray for labels */
-        }
-        input[type="text"],
-        input[type="time"], /* Style for time inputs */
-        select {
-            width: 100%;
-            padding: 0.75rem 1rem; /* More padding */
-            border: 1px solid #cbd5e0; /* Light gray border */
-            border-radius: 0.75rem; /* Rounded input fields */
-            font-size: 1rem;
-            color: #2d3748;
-            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-        }
-        input[type="file"] {
-            display: none; /* Hide default file input */
-        }
-        .custom-file-upload {
-            border: 1px solid #cbd5e0;
-            border-radius: 0.75rem;
-            padding: 0.75rem 1rem;
-            cursor: pointer;
-            background-color: #f0f4f8;
-            color: #4a5568;
-            font-size: 1rem;
-            text-align: center;
-            display: inline-block;
-            width: 100%;
-            transition: background-color 0.2s ease-in-out;
-        }
-        .custom-file-upload:hover {
-            background-color: #e2e8f0;
-        }
-
-        input[type="text"]:focus,
-        input[type="time"]:focus, /* Focus style for time inputs */
-        select:focus {
-            outline: none;
-            border-color: #6366f1; /* Indigo focus color */
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2); /* Soft focus shadow */
-        }
-        input[type="radio"],
-        input[type="checkbox"] {
-            margin-right: 0.5rem;
-            transform: scale(1.1); /* Slightly larger checkboxes/radios */
-        }
-        button, .button-as-div { /* Added .button-as-div for completion area if it needs button styling */
-            width: 100%;
-            padding: 1rem 1.5rem;
-            background-color: #6366f1; /* Indigo button */
-            color: white;
-            border: none;
-            border-radius: 0.75rem;
-            font-size: 1.125rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
-            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
-            text-align: center; /* Ensure text is centered for button/div */
-        }
-        button:hover, .button-as-div:hover {
-            background-color: #4f46e5; /* Darker indigo on hover */
-            transform: translateY(-2px);
-        }
-        button:active, .button-as-div:active {
-            transform: translateY(0);
-            box-shadow: none;
-        }
-        .block-item {
-            display: flex;
-            flex-wrap: wrap; /* Allow wrapping on smaller screens */
-            gap: 1rem; /* Space between items */
-            margin-bottom: 1.5rem;
-            padding: 1.25rem;
-            background-color: #f7fafc; /* Lighter background for block items */
-            border: 1px solid #e2e8f0;
-            border-radius: 1rem;
-            align-items: center;
-        }
-        .block-item > div {
-            flex: 1; /* Distribute space evenly */
-            min-width: 150px; /* Minimum width for each input group */
-        }
-        .visual-upload-section {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            align-items: flex-start; /* Align items to the start */
-        }
-        .image-preview-container {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-top: 0.5rem;
-            width: 100%; /* Take full width */
-        }
-        .image-preview {
-            max-width: 60px; /* Small preview size */
-            max-height: 60px;
-            object-fit: contain;
-            border: 1px solid #cbd5e0;
-            border-radius: 0.5rem;
-            display: none; /* Hidden by default */
-        }
-        .clear-image-btn {
-            background: none;
-            border: none;
-            color: #ef4444; /* Red color for clear button */
-            font-size: 1.25rem;
-            cursor: pointer;
-            padding: 0;
-            margin-left: 0.5rem;
-            line-height: 1;
-            display: none; /* Hidden by default */
-        }
-        .schedule-output {
-            margin-top: 2.5rem;
-            padding-top: 2rem;
-            border-top: 1px dashed #e2e8f0;
-            display: grid;
-            gap: 1.5rem;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Responsive grid */
-        }
-        .schedule-card {
-            background-color: #ffffff;
-            border-radius: 1rem;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            padding: 1.5rem;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            transition: transform 0.2s ease-in-out;
-            position: relative; /* Needed for absolute positioning of checkmark */
-        }
-        .schedule-card:hover {
-            transform: translateY(-5px);
-        }
-        .schedule-card .visual-icon,
-        .schedule-card .visual-image { /* Style for both emoji div and image */
-            font-size: 4rem; /* Larger emoji/icon size */
-            margin-bottom: 1rem;
-            height: 150px; /* Maintain consistent height */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            background-color: #e2e8f0; /* Placeholder background */
-            border-radius: 0.75rem;
-            object-fit: contain; /* Ensure images fit */
-        }
-        .schedule-card .visual-image {
-            width: 100%; /* Ensure image takes full width of its container */
-        }
-        .schedule-card p.activity-time { /* Specific class for time p-tag */
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #2d3748;
-            margin-bottom: 0.5rem;
-        }
-        .schedule-card span.activity-text { /* Specific class for activity span */
-            font-size: 0.9rem;
-            color: #718096;
-        }
-        .message-box {
-            position: fixed;
-            top: 1rem;
-            right: 1rem;
-            padding: 1rem;
-            border-radius: 0.5rem;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            color: white;
-            z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.3s ease-in-out;
-        }
-        .message-box.info { background-color: #2196F3; }
-        .message-box.success { background-color: #4CAF50; }
-        .message-box.error { background-color: #f44336; }
-
-        .completion-area { /* This is now a button, specific styling if needed */
-            width: 100%;
-            padding: 0.75rem;
-            margin-top: 1rem;
-            background-color: #e0f2fe; /* Light blue */
-            border-radius: 0.5rem;
-            cursor: pointer;
-            font-weight: 600;
-            color: #2a4365;
-            transition: background-color 0.2s ease-in-out;
-            text-align: center;
-            border: none; /* Reset button border if any */
-            font-size: 1rem; /* Adjust font size if needed */
-        }
-        .completion-area:hover {
-            background-color: #cce7fa; /* Slightly darker blue on hover */
-        }
-        .schedule-card .checkmark-icon {
-            position: absolute;
-            top: 0.5rem;
-            right: 0.5rem;
-            font-size: 1.5rem;
-            color: #10b981; /* Green checkmark */
-            display: none; /* Hidden by default */
-        }
-        .schedule-card.completed span.activity-text {
-            text-decoration: line-through;
-            color: #718096; /* Gray out completed text */
-        }
-        .schedule-card.completed .completion-area {
-            background-color: #a7f3d0; /* Lighter green for completed area */
-            color: #065f46;
-        }
-        .schedule-card.completed .checkmark-icon {
-            display: block; /* Show checkmark when completed */
-        }
-
-        .flow-arrow {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 0.5rem 0; /* Space between cards and arrows */
-            font-size: 2rem; /* Size of the arrow emoji */
-            color: #6366f1; /* Arrow color */
-            grid-column: 1 / -1; /* Span across all columns in the grid */
-        }
-        @media (max-width: 640px) {
-            .flow-arrow {
-                margin: 0.25rem 0;
-            }
-        }
-
-        .hint-text {
-            font-size: 0.875rem;
-            color: #718096;
-            margin-top: 0.25rem;
-        }
-        .tip-box {
-            background-color: #eef2ff; /* Light indigo background */
-            border-left: 4px solid #6366f1; /* Indigo border */
-            padding: 1rem;
-            margin-top: 1rem;
-            margin-bottom: 1.5rem;
-            border-radius: 0.5rem;
-            font-size: 0.9rem;
-            color: #3730a3; /* Darker indigo text */
-        }
-        .tip-box strong {
-            color: #4f46e5; /* Indigo */
-        }
-
-        @media (max-width: 640px) {
-            .schedule-creator-container {
-                padding: 1.5rem;
-            }
-            h2 {
-                font-size: 1.75rem;
-            }
-            button, .button-as-div { /* Apply to completion-area too if it was styled as a button */
-                font-size: 1rem;
-                padding: 0.8rem 1.2rem;
-            }
-            .block-item {
-                flex-direction: column; /* Stack items vertically on small screens */
-                align-items: stretch;
-            }
-            .block-item > div {
-                min-width: unset; /* Remove min-width constraint */
-            }
-        }
-
-        @page {
-            margin: 0.5cm;
-        }
-        @media print {
-            body {
-                background-color: #fff;
-                padding: 0;
-                margin: 0;
-                color: #000;
-                font-size: 0.9em;
-            }
-            .schedule-creator-container {
-                box-shadow: none;
-                border-radius: 0;
-                padding: 0.5rem;
-                max-width: none;
-                width: auto;
-            }
-            .form-group, #studentFocusGroup, #tipBox, /* Hide new elements in print */
-            #blockConfiguration,
-            #generateSchedule,
-            #printScheduleButton,
-            .bg-yellow-100 {
-                display: none !important;
-            }
-            h2 {
-                display: none;
-            }
-            .print-title {
-                display: block;
-                text-align: center;
-                font-size: 1.8rem;
-                font-weight: 700;
-                margin-top: 0.5rem;
-                margin-bottom: 1rem;
-                color: #000;
-            }
-            .schedule-output {
-                border-top: none;
-                padding-top: 0;
-                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-                gap: 0.75rem;
-            }
-            .schedule-card {
-                box-shadow: none;
-                border: 1px solid #ddd;
-                padding: 0.5rem;
-                break-inside: avoid;
-            }
-            .schedule-card .visual-icon,
-            .schedule-card .visual-image {
-                height: 80px;
-                margin-bottom: 0.25rem;
-                background-color: #fff;
-            }
-            .schedule-card p.activity-time {
-                font-size: 1rem;
-                margin-bottom: 0.2rem;
-            }
-            .schedule-card span.activity-text {
-                font-size: 0.8rem;
-            }
-            .schedule-card.completed span.activity-text {
-                text-decoration: line-through;
-                color: #000;
-            }
-            .schedule-card.completed .checkmark-icon {
-                display: block;
-                color: #10b981;
-            }
-            .schedule-card.completed .completion-area {
-                background-color: #e6ffe6;
-                color: #000;
-            }
-            .flow-arrow {
-                display: flex; /* Ensure arrows are shown in print */
-                color: #000; /* Black arrow for print */
-                font-size: 1.5rem; /* Slightly smaller for print */
-                margin: 0.25rem 0; /* Reduced margin for print */
-            }
-        }
+        body { font-family: 'Inter', sans-serif; background-color: #FDFBF6; color: #3A3535; }
+        .main-container { max-width: 1200px; margin-left: auto; margin-right: auto; padding: 0 1rem; }
+        h1, h2, h3 { font-family: 'Roboto Slab', serif; color: #3A3535; }
+        .nav-link { transition: color 0.3s, border-bottom-color 0.3s; color: #A0A083; }
+        .nav-link:hover, .nav-link.active { color: #3A3535; border-bottom: 2px solid #7E8D85; }
+        .accent-bg { background-color: #A0A083; }
+        .accent-text { color: #A0A083; }
+        .highlight-bg { background-color: #7E8D85; }
+        .highlight-text { color: #7E8D85; }
+        .card { background-color: #FFFFFF; border: 1px solid #D4C8B4; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .accordion-button.open span:last-child { transform: rotate(180deg); }
+        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.5s ease-in-out; }
+        .chart-container { position: relative; width: 100%; max-width: 500px; margin-left: auto; margin-right: auto; height: 300px; max-height: 350px; }
+        @media (min-width: 768px) { .chart-container { height: 350px; max-height: 400px;} }
+        .tab-button.active { border-bottom-color: #7E8D85; color: #3A3535; font-weight: 600; }
+        .tab-button { border-bottom: 2px solid transparent; }
+        .tab-content.hidden { display: none; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #FDFBF6; }
+        ::-webkit-scrollbar-thumb { background: #D4C8B4; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #A0A083; }
+        section { min-height: calc(100vh - 4rem); padding-top: 5rem; padding-bottom: 2rem; } /* 4rem for header height */
     </style>
 </head>
-<body>
-    <div class="schedule-creator-container">
-        <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6" role="alert">
-            <p class="font-bold">Important Note for Educators:</p>
-            <p>This tool helps you create schedules to support student understanding, reduce anxiety, and promote independence, based on established research. Custom images you upload are <strong>temporary</strong> and only visible during your current browser session. For permanent saving, look for a future server-side version!</p>
-            <p class="mt-2">For a deeper understanding of how to effectively use visual schedules, <a href="visual_schedule_interactive_guide.html" target="_blank" rel="noopener noreferrer" class="font-semibold underline hover:text-yellow-800 transition-colors">explore our Comprehensive Interactive Guide</a>.</p>
-        </div>
+<body class="antialiased">
 
-        <h2>Create a Visual Schedule</h2>
-
-        <div class="form-group" id="studentFocusGroup">
-            <label for="studentFocus">Primary Focus of Schedule:</label>
-            <select id="studentFocus" class="mt-1">
-                <option value="none" selected>Select a focus (optional)...</option>
-                <option value="general">General Classroom Routine</option>
-                <option value="individual">Individual Support (Autism/ADHD/Exec. Func.)</option>
-                <option value="first-then">First-Then Sequence (Short tasks)</option>
-                <option value="multi-step">Multi-Step Task Breakdown</option>
-                <option value="transitions">Managing Transitions</option>
-            </select>
-        </div>
-
-        <div id="tipBox" class="tip-box" style="display: none;">
-            <p id="tipText" class="leading-relaxed"></p>
-        </div>
-
-        <div class="form-group">
-            <label for="scheduleType">Schedule Type:</label>
-            <input type="radio" id="dailySchedule" name="scheduleType" value="daily" checked>
-            <label for="dailySchedule" class="inline-block mr-4">Daily Schedule</label>
-            <input type="radio" id="weeklySchedule" name="scheduleType" value="weekly">
-            <label for="weeklySchedule" class="inline-block">Weekly Schedule (Layout for print may vary)</label>
-        </div>
-
-        <div class="form-group">
-            <label for="numBlocks">Number of Time Blocks:</label>
-            <select id="numBlocks" class="mt-1">
-                <option value="2">2 (Typical for First-Then)</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5" selected>5 (Good for part-day)</option>
-                <option value="6">6</option>
-                <option value="7">7</option>
-                <option value="8">8 (Good for full day)</option>
-                <option value="9">9</option>
-                <option value="10">10</option>
-                <option value="11">11</option>
-                <option value="12">12</option>
-            </select>
-            <p class="hint-text">Adjust based on student needs and schedule focus. E.g., 2 for First-Then; 3-5 for part-day; 6+ for full day or complex tasks.</p>
-        </div>
-
-        <div id="blockConfiguration">
+    <header class="bg-white shadow-md fixed top-0 left-0 right-0 z-50 h-16">
+        <nav class="main-container h-full flex items-center justify-between">
+            <a href="#hero" class="text-xl font-bold highlight-text">Visual Schedule Guide</a>
+            <div class="space-x-3 md:space-x-5 text-sm md:text-base">
+                <a href="#introduction" class="nav-link py-5">What Are They?</a>
+                <a href="#benefits" class="nav-link py-5">Benefits</a>
+                <a href="#implementation" class="nav-link py-5">Implementation</a>
+                <a href="#design" class="nav-link py-5">Design</a>
+                <a href="#legal" class="nav-link py-5">Considerations</a>
             </div>
+        </nav>
+    </header>
 
-        <div class="form-group flex items-center">
-            <input type="checkbox" id="includeVisuals" checked class="mr-2">
-            <label for="includeVisuals" class="mb-0">Include Visuals (Emojis & Custom Images)</label>
-        </div>
-        <p class="hint-text -mt-4 mb-4">Tip: Emojis serve as quick icons. Uploaded photos are great for concrete learners. Activity text provides written words.</p>
-
-
-        <button id="generateSchedule" class="mt-6">Generate Schedule</button>
-        <button id="printScheduleButton" class="mt-4 bg-green-500 hover:bg-green-600">Print Schedule</button>
-
-
-        <div id="generatedSchedule" class="schedule-output">
+    <main id="mainContent">
+        <section id="hero" class="flex flex-col items-center justify-center text-center bg-[#F8F5F0] pt-16">
+            <div class="main-container">
+                <h1 class="text-4xl md:text-5xl font-bold mb-6">Visual Schedules in K-8 Classrooms</h1>
+                <p class="text-lg md:text-xl text-gray-700 mb-8 max-w-3xl mx-auto">
+                    An interactive guide to understanding, designing, and implementing effective visual schedules to support student learning and independence.
+                </p>
+                <a href="#introduction" class="px-8 py-3 highlight-bg text-white font-semibold rounded-lg shadow-md hover:bg-opacity-90 transition-colors">
+                    Explore the Guide
+                </a>
             </div>
-    </div>
+        </section>
 
-    <script>
-        // --- DOM Elements ---
-        const numBlocksSelect = document.getElementById('numBlocks');
-        const blockConfigurationDiv = document.getElementById('blockConfiguration');
-        const generateScheduleButton = document.getElementById('generateSchedule');
-        const includeVisualsCheckbox = document.getElementById('includeVisuals');
-        const generatedScheduleDiv = document.getElementById('generatedSchedule');
-        const printScheduleButton = document.getElementById('printScheduleButton');
-        const dailyScheduleRadio = document.getElementById('dailySchedule');
-        const weeklyScheduleRadio = document.getElementById('weeklySchedule');
-        const studentFocusSelect = document.getElementById('studentFocus');
-        const tipBoxDiv = document.getElementById('tipBox');
-        const tipTextP = document.getElementById('tipText');
-
-        const uploadedImageUrls = {}; 
-        let scheduleCompletionStatus = []; 
-
-        const visualOptions = [
-            { value: '', text: 'No Visual' }, { value: '🥞', text: 'Breakfast' },
-            { value: '📚', text: 'Study/Homework' }, { value: '➕', text: 'Math' },
-            { value: '📖', text: 'Reading' }, { value: '✍️', text: 'Writing' },
-            { value: '🔬', text: 'Science' }, { value: '🌍', text: 'Social Studies' },
-            { value: '🏃', text: 'PE/Exercise' }, { value: '🎶', text: 'Music' },
-            { value: '🎨', text: 'Art' }, { value: '🍽️', text: 'Lunch/Meal' },
-            { value: '🛌', text: 'Sleep' }, { value: '🚿', text: 'Shower' },
-            { value: '🚌', text: 'Commute' }, { value: '💼', text: 'Work' },
-            { value: '🛒', text: 'Shopping' }, { value: '🎮', text: 'Game/Free Time' },
-            { value: '🧹', text: 'Clean/Chores' }, { value: '🚶', text: 'Walk' },
-            { value: '🧑‍🤝‍🧑', text: 'Socialize' }, { value: '🧘', text: 'Meditate' },
-            { value: '🏫', text: 'School' }, { value: '🏠', text: 'Home' },
-            { value: '🧩', text: 'Puzzle/Manipulatives' }, { value: '🖥️', text: 'Computer Time' },
-            { value: '🗣️', text: 'Speech Therapy' }, { value: '🫂', text: 'OT/Support' }, 
-            { value: '🧠', text: 'Counseling/Quiet Time' }, { value: '🚽', text: 'Restroom Break' },
-            { value: '↔️', text: 'Transition Time' } 
-        ];
-
-        const focusTips = {
-            "none": "",
-            "general": "<strong>General Classroom Routine:</strong> For whole-class schedules, clearly display the day's main activities. Consider 5-8 blocks. Use consistent visuals everyone understands.",
-            "individual": "<strong>Individual Support (Autism/ADHD/Exec. Func.):</strong> Individual schedules benefit from clear, unambiguous visuals (photos or specific icons). Start with fewer items (3-5 blocks) if needed, and ensure it's easily accessible. Consistency is key.",
-            "first-then": "<strong>First-Then Sequence:</strong> Use 2 blocks. 'First' is the current or less-preferred task, 'Then' is the upcoming or preferred task. Great for motivation and short attention spans.",
-            "multi-step": "<strong>Multi-Step Task Breakdown:</strong> Break down complex tasks (e.g., morning routine, project steps) into individual blocks. Helps with planning and memory. Visuals for each step aid comprehension.",
-            "transitions": "<strong>Managing Transitions:</strong> Clearly show the upcoming activity to prepare students. Visuals can signal that one activity is ending and another is beginning, easing the shift."
-        };
-
-        const focusBlockSuggestions = {
-            "none": "5", 
-            "general": "6",
-            "individual": "4",
-            "first-then": "2",
-            "multi-step": "5",
-            "transitions": "3"
-        };
-
-        studentFocusSelect.addEventListener('change', (event) => {
-            const selectedFocus = event.target.value;
-            if (focusTips[selectedFocus] && selectedFocus !== "none") {
-                tipTextP.innerHTML = focusTips[selectedFocus];
-                tipBoxDiv.style.display = 'block';
-                if (focusBlockSuggestions[selectedFocus]) {
-                    numBlocksSelect.value = focusBlockSuggestions[selectedFocus];
-                }
-            } else {
-                tipBoxDiv.style.display = 'none';
-            }
-             renderBlockInputs(); 
-        });
-        
-        function showMessage(message, type = 'info') {
-            let messageBox = document.getElementById('messageBox');
-            if (!messageBox) {
-                messageBox = document.createElement('div');
-                messageBox.id = 'messageBox';
-                messageBox.className = 'message-box'; 
-                document.body.appendChild(messageBox);
-            }
-            messageBox.textContent = message;
-            messageBox.className = `message-box ${type}`;
-            messageBox.style.opacity = '1';
-            setTimeout(() => {
-                messageBox.style.opacity = '0';
-                setTimeout(() => {
-                    if (messageBox.parentNode) {
-                        messageBox.parentNode.removeChild(messageBox);
-                    }
-                }, 300);
-            }, 3000);
-        }
-
-        function handleImageUpload(event, blockIndex) {
-            const file = event.target.files[0];
-            const previewImg = document.getElementById(`imagePreview${blockIndex}`);
-            const clearBtn = document.getElementById(`clearImageBtn${blockIndex}`);
-            const visualSelect = document.getElementById(`visual${blockIndex}`);
-
-            if (file) {
-                if (file.type.startsWith('image/')) {
-                    if (uploadedImageUrls[blockIndex]) {
-                        URL.revokeObjectURL(uploadedImageUrls[blockIndex]);
-                    }
-                    const imageUrl = URL.createObjectURL(file);
-                    uploadedImageUrls[blockIndex] = imageUrl; 
-                    previewImg.src = imageUrl;
-                    previewImg.style.display = 'block';
-                    clearBtn.style.display = 'inline-block';
-                    if (visualSelect) {
-                        visualSelect.value = ''; 
-                        visualSelect.disabled = true;
-                    }
-                    showMessage("Image selected successfully!", "info");
-                } else {
-                    event.target.value = ''; 
-                    previewImg.style.display = 'none';
-                    clearBtn.style.display = 'none';
-                    uploadedImageUrls[blockIndex] = null;
-                    if (visualSelect) visualSelect.disabled = false;
-                    showMessage("Please select an image file (e.g., .jpg, .png, .gif).", "error");
-                }
-            }
-        }
-
-        function clearImage(blockIndex) {
-            const fileInput = document.getElementById(`customImage${blockIndex}`);
-            const previewImg = document.getElementById(`imagePreview${blockIndex}`);
-            const clearBtn = document.getElementById(`clearImageBtn${blockIndex}`);
-            const visualSelect = document.getElementById(`visual${blockIndex}`);
-            
-            if (fileInput) fileInput.value = ''; 
-            if (previewImg) {
-                previewImg.style.display = 'none';
-                previewImg.src = ''; 
-            }
-            if (clearBtn) clearBtn.style.display = 'none';
-
-            if (uploadedImageUrls[blockIndex]) {
-                URL.revokeObjectURL(uploadedImageUrls[blockIndex]);
-                uploadedImageUrls[blockIndex] = null;
-            }
-            if (visualSelect) visualSelect.disabled = false; 
-        }
-
-        function renderBlockInputs() {
-            const oldNumBlocks = blockConfigurationDiv.children.length;
-            const newNumBlocks = parseInt(numBlocksSelect.value, 10);
-            const includeVisuals = includeVisualsCheckbox.checked;
-
-            if (newNumBlocks < oldNumBlocks) {
-                for (let i = newNumBlocks; i < oldNumBlocks; i++) {
-                    if (uploadedImageUrls[i]) {
-                        URL.revokeObjectURL(uploadedImageUrls[i]);
-                        uploadedImageUrls[i] = null;
-                    }
-                }
-            }
-            
-            blockConfigurationDiv.innerHTML = ''; 
-
-            for (let i = 0; i < newNumBlocks; i++) {
-                const blockItem = document.createElement('div');
-                blockItem.className = 'block-item';
-                let visualInputsHtml = '';
-                if (includeVisuals) {
-                    let optionsHtml = visualOptions.map(option => `<option value="${option.value}">${option.text}</option>`).join('');
-                    visualInputsHtml = `
-                        <div class="visual-upload-section">
-                            <label for="visual${i}">Choose Visual (Emoji):</label>
-                            <select id="visual${i}" class="mt-1" ${uploadedImageUrls[i] ? 'disabled' : ''}>
-                                ${optionsHtml}
-                            </select>
-                            <label class="custom-file-upload mt-2" for="customImage${i}">
-                                Or Upload Your Own Image...
-                            </label>
-                            <input type="file" id="customImage${i}" accept="image/*" class="hidden">
-                            <div class="image-preview-container">
-                                <img id="imagePreview${i}" class="image-preview" alt="Image Preview" src="${uploadedImageUrls[i] || ''}" style="display: ${uploadedImageUrls[i] ? 'block' : 'none'};">
-                                <button type="button" id="clearImageBtn${i}" class="clear-image-btn" title="Clear Image" style="display: ${uploadedImageUrls[i] ? 'inline-block' : 'none'};" aria-label="Clear image for block ${i+1}">✖</button>
-                            </div>
+        <section id="introduction">
+            <div class="main-container">
+                <h2 class="text-3xl font-bold mb-8 text-center">What Are Visual Schedules?</h2>
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <p class="mb-4 text-gray-700 leading-relaxed">
+                            Visual schedules are tools using pictures, symbols, words, or other visual cues to represent a sequence of activities in a specific order. In a classroom, they answer: <strong>what</strong> students should be doing, and <strong>when/where</strong>. They can be tailored for individual students or used for the whole class.
+                        </p>
+                        <p class="mb-4 text-gray-700 leading-relaxed">
+                            Unlike verbal or written agendas, visual schedules use tangible supports, making them accessible for students struggling with reading or processing spoken language. By externalizing the day's plan concretely, they make abstract concepts like time and sequence more understandable.
+                        </p>
+                         <div class="card p-6 mt-6">
+                            <h3 class="text-xl font-semibold mb-3">Key Characteristics:</h3>
+                            <ul class="list-disc list-inside space-y-2 text-gray-700">
+                                <li>Represent sequences of activities visually.</li>
+                                <li>Use objects, photos, icons, or written words.</li>
+                                <li>Can be individual or whole-class.</li>
+                                <li>Vary in length and format (e.g., full day, first-then).</li>
+                                <li>Beneficial in both special and general education.</li>
+                            </ul>
                         </div>
-                    `;
-                }
-
-                blockItem.innerHTML = `
-                    <div>
-                        <label for="startTime${i}">Start Time ${i + 1}:</label>
-                        <input type="time" id="startTime${i}" value="08:00" class="mt-1">
                     </div>
-                    <div>
-                        <label for="endTime${i}">End Time ${i + 1}:</label>
-                        <input type="time" id="endTime${i}" value="09:00" class="mt-1">
+                    <div class="space-y-6">
+                        <div class="card p-6">
+                            <h4 class="text-lg font-semibold mb-2 text-center">Example: First-Then Board</h4>
+                            <div class="flex justify-around items-center p-4 border-2 border-dashed border-D4C8B4 rounded-lg">
+                                <div class="text-center">
+                                    <p class="font-medium">FIRST</p>
+                                    <div class="w-24 h-24 accent-bg rounded-md flex items-center justify-center text-white mt-1 text-sm p-2">📚 Reading Time</div>
+                                </div>
+                                <div class="text-2xl highlight-text font-bold mx-2">➔</div>
+                                <div class="text-center">
+                                    <p class="font-medium">THEN</p>
+                                    <div class="w-24 h-24 accent-bg rounded-md flex items-center justify-center text-white mt-1 text-sm p-2">🧩 Play Time</div>
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-600 mt-2 text-center">Simple sequence for younger children or specific tasks.</p>
+                        </div>
+                        <div class="card p-6">
+                             <h4 class="text-lg font-semibold mb-2 text-center">Example: Part-Day Schedule</h4>
+                             <div class="p-4 border-2 border-dashed border-D4C8B4 rounded-lg">
+                                <div class="flex items-center mb-2">
+                                    <div class="w-10 h-10 highlight-bg rounded-md flex items-center justify-center text-white mr-3 text-xs">9:00</div>
+                                    <p>🎨 Art Class</p>
+                                </div>
+                                <div class="flex items-center mb-2">
+                                    <div class="w-10 h-10 highlight-bg rounded-md flex items-center justify-center text-white mr-3 text-xs">9:45</div>
+                                    <p>🧮 Math Centers</p>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 highlight-bg rounded-md flex items-center justify-center text-white mr-3 text-xs">10:30</div>
+                                    <p>🤸 Recess</p>
+                                </div>
+                             </div>
+                             <p class="text-xs text-gray-600 mt-2 text-center">Shows a chunk of the day's activities.</p>
+                        </div>
                     </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="benefits" class="bg-[#F8F5F0]">
+            <div class="main-container">
+                <h2 class="text-3xl font-bold mb-8 text-center">Benefits and Impact</h2>
+                <p class="text-center text-gray-700 mb-10 max-w-2xl mx-auto">Visual schedules offer a wide array of advantages for students, particularly those with disabilities or executive functioning challenges. Explore the positive impacts below.</p>
+                <div id="benefitsAccordion" class="space-y-4 max-w-3xl mx-auto">
+                </div>
+            </div>
+        </section>
+
+        <section id="implementation">
+            <div class="main-container">
+                <h2 class="text-3xl font-bold mb-8 text-center">Best Practices for Implementation</h2>
+                <p class="text-center text-gray-700 mb-10 max-w-2xl mx-auto">Effective use of visual schedules requires thoughtful planning and consistent teaching. Follow these evidence-based best practices for success.</p>
+                <div id="implementationSteps" class="space-y-4 max-w-3xl mx-auto">
+                </div>
+            </div>
+        </section>
+        
+        <section id="design" class="bg-[#F8F5F0]">
+            <div class="main-container">
+                <h2 class="text-3xl font-bold mb-8 text-center">Design Considerations</h2>
+                <p class="text-center text-gray-700 mb-10 max-w-2xl mx-auto">Tailoring a visual schedule to student needs is crucial. Consider these design elements for optimal effectiveness.</p>
+                <div class="grid md:grid-cols-2 gap-8 items-start">
                     <div>
-                        <label for="activity${i}">Activity ${i + 1}:</label>
-                        <input type="text" id="activity${i}" placeholder="e.g., Breakfast" class="mt-1">
+                        <h3 class="text-2xl font-semibold mb-4">Key Design Elements:</h3>
+                        <div id="designConsiderationsAccordion" class="space-y-3">
+                        </div>
                     </div>
-                    ${visualInputsHtml}
-                `;
-                blockConfigurationDiv.appendChild(blockItem);
+                    <div class="card p-6">
+                        <h3 class="text-xl font-semibold mb-4 text-center">Common Representation Types</h3>
+                         <div class="chart-container">
+                            <canvas id="representationChart"></canvas>
+                        </div>
+                        <p class="text-xs text-gray-600 mt-3 text-center">Choose based on student's comprehension level.</p>
 
-                if (includeVisuals) {
-                    const fileInput = document.getElementById(`customImage${i}`);
-                    const clearBtn = document.getElementById(`clearImageBtn${i}`);
-                    const visualSelect = document.getElementById(`visual${i}`);
+                        <div class="mt-8">
+                            <h4 class="text-lg font-semibold mb-3">Schedule Helper (Conceptual)</h4>
+                            <label for="studentAge" class="block text-sm font-medium text-gray-700 mb-1">Student's Age Group:</label>
+                            <select id="studentAge" class="w-full p-2 border border-D4C8B4 rounded-md focus:ring-1 focus:ring-7E8D85 focus:border-7E8D85 mb-3">
+                                <option value="prek">Pre-K / Early K</option>
+                                <option value="k2">Grades K-2</option>
+                                <option value="35">Grades 3-5</option>
+                                <option value="68">Grades 6-8</option>
+                            </select>
+                            <label for="comprehensionLevel" class="block text-sm font-medium text-gray-700 mb-1">Comprehension Level:</label>
+                            <select id="comprehensionLevel" class="w-full p-2 border border-D4C8B4 rounded-md focus:ring-1 focus:ring-7E8D85 focus:border-7E8D85 mb-3">
+                                <option value="concrete">Concrete (Objects/Photos)</option>
+                                <option value="symbolic">Symbolic (Icons)</option>
+                                <option value="reader">Reader (Words)</option>
+                            </select>
+                            <button id="suggestionBtn" class="w-full px-4 py-2 highlight-bg text-white font-semibold rounded-md hover:bg-opacity-90 transition">Get Suggestion</button>
+                            <div id="suggestionOutput" class="mt-4 p-3 bg-teal-50 border border-teal-200 rounded-md text-sm text-teal-700 hidden"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-                    fileInput.addEventListener('change', (event) => handleImageUpload(event, i));
-                    clearBtn.addEventListener('click', () => {
-                        clearImage(i);
-                        showMessage("Custom image cleared.", "info");
-                    });
+        <section id="legal">
+            <div class="main-container">
+                <h2 class="text-3xl font-bold mb-10 text-center">Legal, Ethical & Resource Considerations</h2>
+                <div class="max-w-4xl mx-auto">
+                    <div class="mb-6 border-b border-gray-300">
+                        <nav class="-mb-px flex space-x-6" aria-label="Tabs">
+                            <button class="tab-button active" data-tab="legalEthical">Legal & Ethical</button>
+                            <button class="tab-button" data-tab="resources">Resources & Copyright</button>
+                            <button class="tab-button" data-tab="effectiveness">Effectiveness & Limitations</button>
+                        </nav>
+                    </div>
+
+                    <div id="legalEthical" class="tab-content space-y-6">
+                        <div class="card p-6">
+                            <h3 class="text-xl font-semibold mb-3">Legal Guidelines (IEPs & Accommodations)</h3>
+                            <p class="text-gray-700 leading-relaxed">Visual schedules are often specified in IEPs for students with disabilities (e.g., autism, ADHD) as a required support under IDEA. Schools are legally obligated to implement these. They can also be part of "reasonable accommodations" under Section 504. Failure to provide a needed visual schedule can impede a student's access to education.</p>
+                        </div>
+                         <div class="card p-6">
+                            <h3 class="text-xl font-semibold mb-3">Ethical Use & Student Dignity</h3>
+                            <p class="text-gray-700 leading-relaxed mb-2">Use visual schedules positively, not punitively. Maintain student dignity and privacy, especially with older students where schedules should be discreet and age-appropriate. Ensure visuals are culturally and linguistically relevant.</p>
+                            <p class="text-gray-700 leading-relaxed">For example, use neutral terms for sensitive appointments (e.g., "Meeting" instead of detailing therapy types) on publicly visible schedules.</p>
+                        </div>
+                    </div>
+
+                    <div id="resources" class="tab-content hidden space-y-6">
+                        <div class="card p-6">
+                            <h3 class="text-xl font-semibold mb-3">Copyright & Image Use</h3>
+                            <p class="text-gray-700 leading-relaxed">Be mindful of copyrighted symbol sets (e.g., Boardmaker PCS®). Ensure your school has licenses if using them. Many free and open-source icon libraries exist (e.g., ARASAAC). For custom schedules with internet images, verify usage rights, especially if sharing materials broadly.</p>
+                        </div>
+                        <div class="card p-6">
+                            <h3 class="text-xl font-semibold mb-3">Publicly Available Resources</h3>
+                             <ul class="list-disc list-inside space-y-2 text-gray-700">
+                                <li><strong>Templates & Printables:</strong> Websites like TeachersPayTeachers, A Day in Our Shoes, and Social Worker's Toolbox offer free visual schedule materials.</li>
+                                <li><strong>Software & Apps:</strong> Apps like Choiceworks, First Then Visual Schedule, or general tools like PowerPoint/Google Slides can be used. Specialized software (Boardmaker, Picto-Selector) offer extensive symbol libraries.</li>
+                                <li><strong>Professional Guidelines:</strong> Autism organizations (e.g., IRCA, Autism Speaks) and education centers (e.g., NPDC on Autism, AFIRM) provide evidence-based practice guides.</li>
+                                <li><strong>Collaboration:</strong> Work with SLPs, OTs, and behavior specialists for expertise and shared resources.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div id="effectiveness" class="tab-content hidden space-y-6">
+                         <div class="card p-6">
+                            <h3 class="text-xl font-semibold mb-3">When & Where Most Effective</h3>
+                            <p class="text-gray-700 leading-relaxed mb-2">Visual schedules are particularly potent for:</p>
+                            <ul class="list-disc list-inside space-y-1 text-gray-700">
+                                <li>Daily classroom routines and transitions.</li>
+                                <li>Managing independent work periods and learning centers.</li>
+                                <li>Guiding multi-step activities (e.g., science experiments, arrival/dismissal routines).</li>
+                                <li>Transitions between environments (e.g., classroom to specials, lunch).</li>
+                                <li>Structuring unstructured or stressful times (e.g., choice boards for free time).</li>
+                                <li>Home-school consistency and next-day preparation.</li>
+                            </ul>
+                        </div>
+                        <div class="card p-6">
+                            <h3 class="text-xl font-semibold mb-3">Limitations & Cautions</h3>
+                             <p class="text-gray-700 leading-relaxed mb-2">Consider these situations:</p>
+                            <ul class="list-disc list-inside space-y-1 text-gray-700">
+                                <li><strong>Internalized Routines:</strong> May not be needed if students have mastered the routine; fade gradually to more age-typical tools like planners.</li>
+                                <li><strong>Age Appropriateness:</strong> Older students (grades 6-8) need age-respectful formats (e.g., written agendas, digital tools) to avoid stigma.</li>
+                                <li><strong>Over-Rigidity:</strong> Teach flexibility; a schedule is a guide, not gospel. Include "change" indicators.</li>
+                                <li><strong>Spontaneity:</strong> Not for every unexpected event; pair with other coping strategies.</li>
+                                <li><strong>Underlying Issues:</strong> A schedule is a support, not a cure-all. Address skill gaps or motivational issues alongside schedule use.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="mt-16 py-8 bg-slate-800 text-slate-300 text-center">
+        <div class="main-container">
+            <p class="text-sm">&copy; <span id="currentYear"></span> Interactive Visual Schedule Guide. Content adapted from "Visual Schedules in K–8 Classrooms: A Comprehensive Guide".</p>
+            <p class="text-xs mt-2">This tool is for informational purposes to enhance understanding of visual schedules.</p>
+        </div>
+    </footer>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+        // Smooth scroll for nav links
+        const navLinks = document.querySelectorAll('.nav-link[href^="#"], a[href^="#hero"]');
+        navLinks.forEach(link => {
+            link.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href').substring(1);
+                const targetElement = document.getElementById(targetId);
+                if (targetElement) {
+                    const headerOffset = document.querySelector('header').offsetHeight;
+                    const elementPosition = targetElement.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
                     
-                    if (visualSelect) {
-                        if (uploadedImageUrls[i]) {
-                            visualSelect.value = ''; 
-                        } // No else needed, default selection works
-                        visualSelect.addEventListener('change', () => {
-                            if (visualSelect.value !== '') { 
-                                clearImage(i); 
-                                // No need to show "image cleared" if user just selected an emoji over nothing
-                            }
-                        });
-                    }
-                }
-            }
-        }
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
 
-        function toggleCompletion(index) {
-            const cards = Array.from(generatedScheduleDiv.querySelectorAll('.schedule-card'));
-            const card = cards[index];
-            if (card) {
-                scheduleCompletionStatus[index] = !scheduleCompletionStatus[index]; 
-                card.classList.toggle('completed', scheduleCompletionStatus[index]); 
-            }
-        }
-
-        function renderScheduleCard(scheduleItem, container, index) {
-            const card = document.createElement('div');
-            card.className = 'schedule-card';
-            let visualHtml;
-            if (scheduleItem.visualType === 'image' && scheduleItem.visualContent) {
-                visualHtml = `<img src="${scheduleItem.visualContent}" class="visual-image" alt="${scheduleItem.activity} visual">`;
-            } else {
-                const emojiContent = scheduleItem.visualContent || '❔'; 
-                visualHtml = `<div class="visual-icon" role="img" aria-label="${scheduleItem.activity} icon">${emojiContent}</div>`;
-            }
-            if (scheduleCompletionStatus[index]) {
-                card.classList.add('completed');
-            }
-            card.innerHTML = `
-                <div class="checkmark-icon" aria-hidden="true">✅</div> ${visualHtml}
-                <p class="activity-time">${scheduleItem.startTime} - ${scheduleItem.endTime}</p>
-                <span class="activity-text">${scheduleItem.activity}</span> 
-                <button type="button" class="completion-area" data-index="${index}" aria-label="Mark activity ${scheduleItem.activity} as done">Done</button>
-            `;
-            container.appendChild(card);
-            const completionButton = card.querySelector('.completion-area');
-            if (completionButton) {
-                completionButton.addEventListener('click', () => toggleCompletion(index));
-            }
-        }
-
-        function displayGeneratedSchedule(scheduleItems) {
-            generatedScheduleDiv.innerHTML = ''; 
-            scheduleCompletionStatus = new Array(scheduleItems.length).fill(false); 
-
-            if (scheduleItems.length === 0) {
-                generatedScheduleDiv.innerHTML = '<p class="text-center text-gray-500 col-span-full">No schedule generated. Please define blocks and activities.</p>';
-                return;
-            }
-            scheduleItems.forEach((item, index) => {
-                renderScheduleCard(item, generatedScheduleDiv, index);
-                if (index < scheduleItems.length - 1) {
-                    const arrowDiv = document.createElement('div');
-                    arrowDiv.className = 'flow-arrow';
-                    arrowDiv.setAttribute('aria-hidden', 'true'); 
-                    arrowDiv.innerHTML = '⬇️'; 
-                    generatedScheduleDiv.appendChild(arrowDiv);
+                    // Update active link (optional)
+                    navLinks.forEach(nav => nav.classList.remove('active'));
+                    this.classList.add('active');
                 }
             });
-            showMessage("Schedule generated successfully!", "success");
+        });
+        
+        // Active link on scroll
+        const sections = document.querySelectorAll('section');
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop - document.querySelector('header').offsetHeight - 50; // Adjust offset as needed
+                if (pageYOffset >= sectionTop) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href').substring(1) === current) {
+                    link.classList.add('active');
+                }
+            });
+             // If scrolled to top, hero link active
+            if(window.pageYOffset < sections[0].offsetTop) {
+                 navLinks.forEach(link => link.classList.remove('active'));
+                 document.querySelector('a[href^="#hero"]').classList.add('active');
+            }
+        });
+
+
+        // Accordion data
+        const benefitsData = [
+            { title: "Enhanced Understanding & Receptive Language", content: "Visuals are easier to process than spoken instructions for many students, especially those with ASD or ADHD, improving grasp of expectations." },
+            { title: "Structure, Predictability & Reduced Anxiety", content: "Knowing 'what comes next' reduces anxiety and creates a sense of safety, vital for neurodivergent students and beneficial for all." },
+            { title: "Increased On-Task Behavior & Engagement", content: "Visuals help students focus on one step at a time, serving as a constant, non-judgmental prompt, reducing distractions." },
+            { title: "Greater Independence & Self-Regulation", content: "Students learn to follow schedule cues themselves, reducing reliance on adult prompts and boosting self-sufficiency and confidence." },
+            { title: "Improved Transitions & Behavior", content: "Visuals signal upcoming transitions consistently, easing shifts between activities and reducing resistance or meltdowns." },
+            { title: "Confidence, Motivation & Emotional Benefits", content: "Completing tasks on a schedule fosters a sense of accomplishment, boosting confidence and a positive attitude towards school." }
+        ];
+
+        const implementationData = [
+            { title: "1. Match Schedule to Student's Needs", content: "Design format (objects, photos, icons, words) and length (first-then, half-day, full-day) based on developmental level, attention span, and comprehension. Start simpler if unsure." },
+            { title: "2. Make Schedule Accessible & Consistent", content: "Place schedule at student's eye level, in a consistent location (central or portable). Use same symbols consistently. Review daily." },
+            { title: "3. Teach How to Use the Schedule Explicitly", content: "Model and prompt. Teach icon meanings. Guide transitions. Use minimal verbal prompts, focusing student on visual cues. Gradually fade assistance." },
+            { title: "4. Use Cues & Reinforcement for Transitions", content: "Use visual transition cues (e.g., a 'schedule' icon card). Reinforce following the schedule calmly (praise, rewards). Pair with other behavior supports if needed." },
+            { title: "5. Be Flexible & Update as Skills Grow", content: "Reassess and adjust. Move to more advanced formats (e.g., picture to written words, planner) as students mature. Teach coping with changes (e.g., a 'change' card)." },
+            { title: "6. Communicate with Families & Staff", content: "Share strategies with parents for home consistency. Ensure all school staff use the schedule and cues consistently. Provide mini-schedules for transitions to other settings." }
+        ];
+
+        const designConsiderationsData = [
+            { title: "Type of Representation", content: "Choose from real objects, photographs, picture icons (e.g., Boardmaker), or written words. Combine words with pictures for literacy. Ensure the student understands the chosen representation." },
+            { title: "Schedule Length & Chunking", content: "Options: First-Then boards (1-2 items), half-day schedules, or full-day schedules. Layouts can be top-to-bottom (most common) or left-to-right. Balance providing enough information without overwhelming the student." },
+            { title: "Portability & Location", content: "Stationary (wall chart) for whole class or portable (binder, lanyard) for individual students moving between settings. Ensure durability if handled frequently." },
+            { title: "Method for Indicating Finished Tasks", content: "Student should actively engage: remove picture to a 'finished' envelope, carry icon to the area, cross off/check item, or flip card over. This enhances understanding and independence." },
+            { title: "Use of Color & Other Visual Cues", content: "Color-code subjects or days. Use arrows or clock faces for time concepts. Pair with visual timers. Ensure clear spacing and avoid clutter." },
+            { title: "Customization & Student Involvement", content: "Involve students in choosing images or themes. Use photos of actual environments/people. Shift responsibility for managing the schedule to the student as they advance." },
+            { title: "Digital Visual Schedules", content: "Tablet apps can offer interactive schedules with alerts. Easy to modify. Consider if student responds better to physical or digital. Older students might transition to digital calendars." }
+        ];
+        
+        function createAccordion(containerId, data) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            data.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'card';
+
+                const button = document.createElement('button');
+                button.className = 'accordion-button w-full flex justify-between items-center p-4 text-left font-semibold highlight-text hover:bg-gray-50 focus:outline-none';
+                button.innerHTML = `
+                    <span>${item.title}</span>
+                    <span class="transform transition-transform duration-300 text-xl highlight-text">↓</span>
+                `;
+
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'accordion-content px-4 pb-4 text-gray-700 leading-relaxed';
+                contentDiv.innerHTML = `<p>${item.content}</p>`;
+
+                button.addEventListener('click', () => {
+                    const isOpen = button.classList.toggle('open');
+                    contentDiv.style.maxHeight = isOpen ? contentDiv.scrollHeight + "px" : "0";
+                    // Close other accordions in the same group
+                    Array.from(container.querySelectorAll('.accordion-button.open')).forEach(openButton => {
+                        if (openButton !== button) {
+                            openButton.classList.remove('open');
+                            openButton.nextElementSibling.style.maxHeight = "0";
+                        }
+                    });
+                });
+
+                itemDiv.appendChild(button);
+                itemDiv.appendChild(contentDiv);
+                container.appendChild(itemDiv);
+            });
         }
 
-        numBlocksSelect.addEventListener('change', renderBlockInputs);
-        includeVisualsCheckbox.addEventListener('change', renderBlockInputs); 
+        createAccordion('benefitsAccordion', benefitsData);
+        createAccordion('implementationSteps', implementationData);
+        createAccordion('designConsiderationsAccordion', designConsiderationsData);
 
-        generateScheduleButton.addEventListener('click', () => {
-            generatedScheduleDiv.innerHTML = '<p class="text-center text-gray-500 col-span-full mt-2">Generating schedule...</p>';
-            const numBlocks = parseInt(numBlocksSelect.value, 10);
-            const includeVisuals = includeVisualsCheckbox.checked;
-            const scheduleData = [];
-            let allActivitiesDefined = true;
+        // Chart.js for Representation Types
+        const ctx = document.getElementById('representationChart');
+        if (ctx) {
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Objects', 'Photographs', 'Icons/Drawings', 'Written Words'],
+                    datasets: [{
+                        label: 'Representation Types',
+                        data: [15, 25, 40, 20], // Illustrative percentages
+                        backgroundColor: ['#A0A083', '#D4C8B4', '#7E8D85', '#B0A89A'],
+                        borderColor: '#FDFBF6',
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#3A3535', font: { size: 12 } } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) { label += ': '; }
+                                    if (context.parsed !== null) { label += context.parsed + '% (Illustrative)'; }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    layout: { padding: 10 }
+                }
+            });
+        }
 
-            for (let i = 0; i < numBlocks; i++) {
-                const startTimeInput = document.getElementById(`startTime${i}`);
-                const endTimeInput = document.getElementById(`endTime${i}`);
-                const activityInput = document.getElementById(`activity${i}`);
+        // Schedule Helper Logic
+        const suggestionBtn = document.getElementById('suggestionBtn');
+        const suggestionOutput = document.getElementById('suggestionOutput');
+        if (suggestionBtn && suggestionOutput) {
+            suggestionBtn.addEventListener('click', () => {
+                const age = document.getElementById('studentAge').value;
+                const comprehension = document.getElementById('comprehensionLevel').value;
+                let suggestionText = "Consider: ";
 
-                const startTime = startTimeInput ? startTimeInput.value : 'N/A';
-                const endTime = endTimeInput ? endTimeInput.value : 'N/A';
-                const activity = activityInput ? (activityInput.value.trim() || `Activity ${i+1}`) : `Activity ${i+1}`;
+                if (age === 'prek' || comprehension === 'concrete') {
+                    suggestionText += "<strong>First-Then board</strong> or short schedule with <strong>real objects or clear photographs</strong>. Focus on 2-3 activities. ";
+                } else if (age === 'k2') {
+                    suggestionText += "Schedule with <strong>picture icons</strong> (and words if emerging reader). Half-day or 3-5 activities shown at once. ";
+                } else if (age === '35') {
+                    suggestionText += "Schedule with <strong>icons and written words</strong>, potentially moving to mostly written lists. Full day in chunks (morning/afternoon). ";
+                } else { // 68
+                    suggestionText += "<strong>Written agendas, checklists, or digital planners</strong>. Focus on age-appropriate formats. Full day view is likely manageable. ";
+                }
+
+                if (comprehension === 'symbolic' && age !== 'prek') {
+                    suggestionText += "Ensure icons are well-understood. ";
+                }
+                if (comprehension === 'reader') {
+                    suggestionText += "Prioritize written words, possibly supplemented by minimal icons if helpful for quick scanning.";
+                }
                 
-                if (activityInput && !activityInput.value.trim()) {
-                     allActivitiesDefined = false; 
-                }
+                suggestionOutput.innerHTML = suggestionText + "<br><small>This is a general suggestion. Always individualize based on the specific student.</small>";
+                suggestionOutput.classList.remove('hidden');
+            });
+        }
+        
+        // Tabs for Legal section
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
 
-                let visualContent = '';
-                let visualType = '';
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
 
-                if (includeVisuals) {
-                    const customImage = uploadedImageUrls[i]; 
-                    if (customImage) {
-                        visualContent = customImage;
-                        visualType = 'image';
+                const targetTab = button.dataset.tab;
+                tabContents.forEach(content => {
+                    if (content.id === targetTab) {
+                        content.classList.remove('hidden');
                     } else {
-                        const emojiSelect = document.getElementById(`visual${i}`);
-                        visualContent = emojiSelect ? emojiSelect.value : '';
-                        visualType = 'emoji';
+                        content.classList.add('hidden');
                     }
-                }
-                scheduleData.push({
-                    startTime: startTime, endTime: endTime, activity: activity,
-                    visualContent: visualContent, visualType: visualType
                 });
-            }
-            
-            if (!allActivitiesDefined && numBlocks > 0) {
-                 showMessage("Some activities were not named and have been given default names. Please review.", "info");
-            }
-            displayGeneratedSchedule(scheduleData);
+            });
         });
 
-        printScheduleButton.addEventListener('click', () => {
-            if (generatedScheduleDiv.children.length === 0 || generatedScheduleDiv.querySelector('p.text-center')) {
-                showMessage("Please generate a schedule first!", "error");
-                return;
-            }
-            const originalTitle = document.title;
-            const scheduleType = dailyScheduleRadio.checked ? "Daily Schedule" : "Weekly Schedule";
-            document.title = `${scheduleType} - Visual Schedule`;
-            let printTitleElement = document.querySelector('.print-title');
-            if (!printTitleElement) {
-                printTitleElement = document.createElement('h1');
-                printTitleElement.className = 'print-title';
-                generatedScheduleDiv.parentNode.insertBefore(printTitleElement, generatedScheduleDiv);
-            }
-            printTitleElement.textContent = `${scheduleType}`;
-            window.print(); 
-            setTimeout(() => {
-                document.title = originalTitle;
-                if (printTitleElement && printTitleElement.parentNode) {
-                    printTitleElement.parentNode.removeChild(printTitleElement);
-                }
-            }, 500); 
-        });
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const initialFocus = studentFocusSelect.value;
-            if (focusTips[initialFocus] && initialFocus !== "none") {
-                tipTextP.innerHTML = focusTips[initialFocus];
-                tipBoxDiv.style.display = 'block';
-                 if (focusBlockSuggestions[initialFocus]) { 
-                    numBlocksSelect.value = focusBlockSuggestions[initialFocus];
-                }
-            }
-            renderBlockInputs();
-        });
-    </script>
+    });
+</script>
 </body>
 </html>
